@@ -33,6 +33,7 @@ requires = [
     'colander>=0.9.9dev', # cstruct_children/appstruct_children
     'peppercorn>=0.3', # rename operation type
     'translationstring>=1.0', # add format mapping with %
+    'zope.event',
     ]
 
 testing_extras = ['nose', 'coverage', 'beautifulsoup4']

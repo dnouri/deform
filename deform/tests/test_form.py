@@ -1,5 +1,7 @@
 import unittest
 
+import zope.event
+
 class TestForm(unittest.TestCase):
     def _makeOne(self, schema, **kw):
         from deform.form import Form
@@ -73,6 +75,25 @@ class TestForm(unittest.TestCase):
         schema.children = [DummySchema()]
         form = self._makeOne(schema, autocomplete=False)
         self.assertEqual(form.autocomplete, 'off')
+
+    def test_render_event(self):
+        schema = DummySchema()
+        form = self._makeOne(schema)
+        appstruct = object()
+
+        old_subscribers = zope.event.subscribers[:]
+        events = []
+        zope.event.subscribers.append(lambda ev: events.append(ev))
+        try:
+            form.render(appstruct, kwarg1='kwvalue1')
+        finally:
+            zope.event.subscribers[:] = old_subscribers
+
+        self.assertEqual(len(events), 1)
+        event = events[0]
+        self.assertEqual(event.form, form)
+        self.assertEqual(event.args, {
+            'appstruct': appstruct, 'kwarg1': 'kwvalue1'})
 
 class TestIssues(unittest.TestCase):
 

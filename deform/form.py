@@ -1,12 +1,20 @@
 import re
 
 from chameleon.utils import Markup
+from zope.event import notify
 
 from . import (
     compat,
     field,
     widget,
     )
+
+_marker = object()
+
+class FormRender(object):
+    def __init__(self, form, **kw):
+        self.form = form
+        self.args = kw
 
 class Form(field.Field):
     """
@@ -120,6 +128,14 @@ class Form(field.Field):
             self.autocomplete = 'off'
         self.ajax_options = Markup(ajax_options.strip())
         self.widget = widget.FormWidget()
+
+    def render(self, appstruct=_marker, **kw):
+        if appstruct is not _marker:
+            kw['appstruct'] = appstruct
+
+        html = super(Form, self).render(**kw)
+        notify(FormRender(self, **kw))
+        return html
 
 class Button(object):
     """
